@@ -1,0 +1,990 @@
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MODS AIM DELIVERY</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+    />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+        rel="stylesheet"
+    />
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-image: linear-gradient(to right top, #d16ba5, #c777b9, #ba83ca, #aa8fd8, #9a9ae1, #8aa7ec, #79b3f4, #69bff8, #52cffe, #41dfff, #46e8d8, #5ffbf1);
+            background-size: cover;
+            background-attachment: fixed;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .container {
+            max-width: 1000px;
+        }
+        section {
+            border-radius: 1.5rem; /* Increased border radius */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* Added shadow */
+            padding: 2rem;
+            background-color: rgba(255, 255, 255, 0.9); /* Slightly transparent white */
+        }
+        .file-item {
+            border-radius: 0.75rem;
+            transition: all 0.2s ease-in-out;
+        }
+        .file-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .modal-content {
+            border-radius: 1rem;
+        }
+        input[type="text"], input[type="password"], input[type="file"], input[type="email"], input[type="tel"], input[type="url"], select {
+            border-radius: 0.5rem;
+        }
+        button {
+            border-radius: 0.5rem;
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+        }
+        button:hover {
+            transform: translateY(-1px);
+        }
+        /* Style for disabled elements in demo mode */
+        .demo-disabled-input {
+            opacity: 0.7;
+            cursor: not-allowed !important;
+            pointer-events: none; /* Prevent click events / typing */
+        }
+         .demo-disabled-button {
+            opacity: 0.7;
+            cursor: not-allowed !important;
+            pointer-events: none; /* Prevent click events */
+        }
+        /* New style for elements that can be clicked but not edited */
+        .demo-interactive-disabled input, .demo-interactive-disabled select {
+             /* Remove pointer-events: none for select to allow click */
+             /* Add a specific style to show they're disabled for editing */
+             background-color: #f0f0f0; /* Light gray background */
+        }
+
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+
+    <div id="loginModal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[100] hidden">
+        <div class="bg-white rounded-lg shadow-xl p-8 max-w-sm w-full modal-content">
+            <h3 class="text-2xl font-bold mb-6 text-center text-gray-800">Login</h3>
+            <form id="loginForm" class="space-y-4">
+                <div>
+                    <label for="usernameInput" class="block mb-2 font-medium text-gray-700">Username</label>
+                    <input type="text" id="usernameInput" placeholder="Masukkan Username" required
+                           class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+                </div>
+                <div>
+                    <label for="passwordInput" class="block mb-2 font-medium text-gray-700">Password</label>
+                    <input type="password" id="passwordInput" placeholder="Masukkan Password" required
+                           class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+                </div>
+                <button type="submit" class="w-full bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700 transition font-semibold">Login</button>
+                <p id="loginMessage" class="mt-3 text-center text-sm text-red-600 font-medium"></p>
+            </form>
+        </div>
+    </div>
+
+    <header class="bg-blue-700 text-white p-4 shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto flex flex-col md:flex-row justify-between items-center">
+            <h1 class="text-3xl font-bold mb-2 md:mb-0">MODS AIM DELIVERY</h1>
+            <nav class="space-x-4 md:space-x-6 text-sm md:text-base flex justify-center flex-wrap">
+                <a href="#home" id="navHome" class="hover:underline py-1 hidden">Beranda</a>
+                <a href="#manage" id="navManage" class="hover:underline py-1 hidden">Kelola File & Link</a>
+                <a href="#files" id="navFiles" class="hover:underline py-1 hidden">Daftar File & Link</a>
+                <a href="#history" id="navHistory" class="hover:underline py-1 hidden">History Pengiriman</a>
+                <button id="logoutBtn" class="bg-red-500 hover:bg-red-600 text-white px-4 py-1 rounded hidden transition">Logout</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto flex-grow p-4 md:p-8">
+        <section id="home" class="mb-12 text-center hidden">
+            <h2 class="text-3xl font-bold mb-4 text-gray-800">Selamat Datang di MODS AIM DELIVERY!</h2>
+            <p id="welcomeMessage" class="text-lg text-gray-700 mb-6"></p>
+            <p class="text-gray-600">Silakan jelajahi daftar file dan link yang tersedia.</p>
+            <div id="adminActionButtons" class="mt-8 space-y-4 md:space-x-4 md:space-y-0 hidden">
+                <button id="goToManageBtn" class="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition font-semibold">
+                    <i class="fas fa-plus-circle mr-2"></i>Kelola File & Link
+                </button>
+                <button id="openShareModalBtn" class="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition font-semibold">
+                    <i class="fas fa-share-alt mr-2"></i>Kirim File/Link
+                </button>
+            </div>
+        </section>
+
+        <section id="manage" class="mb-12 hidden">
+            <h2 class="text-3xl font-bold mb-6 text-gray-800 text-center">Kelola File & Link</h2>
+
+            <h3 class="text-2xl font-semibold mb-4 text-gray-700">Upload File Baru</h3>
+            <form id="uploadForm" class="space-y-6 mb-10" autocomplete="off">
+                <div>
+                    <label for="fileInput" class="block mb-2 font-medium text-gray-700">Pilih File</label>
+                    <input
+                        type="file"
+                        id="fileInput"
+                        required
+                        class="block w-full text-lg text-gray-700 file:mr-4 file:py-3 file:px-6 file:rounded-full file:border-0 file:text-lg file:font-semibold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200 cursor-pointer"
+                    />
+                </div>
+                <div>
+                    <label for="fileName" class="block mb-2 font-medium text-gray-700">Nama File (opsional)</label>
+                    <input
+                        type="text"
+                        id="fileName"
+                        placeholder="Beri nama file (jika ingin mengganti nama)"
+                        class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                </div>
+                <button
+                    type="submit"
+                    class="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition font-semibold w-full md:w-auto"
+                >
+                    <i class="fas fa-cloud-upload-alt mr-2"></i>Upload File
+                </button>
+            </form>
+            <p id="uploadMessage" class="mt-4 text-center text-sm text-green-600 font-medium"></p>
+
+            <hr class="my-8 border-gray-300">
+
+            <h3 class="text-2xl font-semibold mb-4 text-gray-700">Tambah Link Baru</h3>
+            <form id="addLinkForm" class="space-y-6" autocomplete="off">
+                <div>
+                    <label for="linkUrl" class="block mb-2 font-medium text-gray-700">URL Link</label>
+                    <input
+                        type="url"
+                        id="linkUrl"
+                        placeholder="Contoh: https://example.com/dokumen-penting.pdf"
+                        required
+                        class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                </div>
+                <div>
+                    <label for="linkName" class="block mb-2 font-medium text-gray-700">Nama Link</label>
+                    <input
+                        type="text"
+                        id="linkName"
+                        placeholder="Beri nama untuk link ini (misal: Dokumen Penting)"
+                        required
+                        class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                </div>
+                <button
+                    type="submit"
+                    class="bg-purple-600 text-white px-8 py-3 rounded-lg hover:bg-purple-700 transition font-semibold w-full md:w-auto"
+                >
+                    <i class="fas fa-link mr-2"></i>Tambah Link
+                </button>
+            </form>
+            <p id="linkMessage" class="mt-4 text-center text-sm text-green-600 font-medium"></p>
+        </section>
+
+        <section id="files" class="mb-12 hidden">
+            <h2 class="text-3xl font-bold mb-6 text-gray-800 text-center">Daftar File & Link Tersedia</h2>
+            <div id="filesList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <p class="text-gray-500 col-span-full text-center">Belum ada file atau link yang diupload/ditambahkan.</p>
+            </div>
+        </section>
+
+        <section id="history" class="mb-12 hidden">
+            <h2 class="text-3xl font-bold mb-6 text-gray-800 text-center">History Pengiriman</h2>
+            <div id="historyList" class="space-y-4">
+                <p class="text-gray-500 text-center">Belum ada riwayat pengiriman.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-blue-700 text-white p-4 text-center shadow-inner mt-auto">
+        &copy; 2024 MODS AIM DELIVERY
+    </footer>
+
+    <div id="universalShareModal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-lg max-w-md w-full p-6 relative modal-content">
+            <h3 class="text-2xl font-semibold mb-4 text-gray-800 text-center">Kirim File atau Link</h3>
+            <p class="mb-4 text-gray-600 text-center">Pilih item yang ingin Anda kirim dan metode pengirimannya.</p>
+
+            <div class="space-y-4 mb-6">
+                <div>
+                    <label for="itemSelect" class="block mb-2 font-medium text-gray-700">Pilih File/Link</label>
+                    <select id="itemSelect" class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">-- Pilih Item --</option>
+                        </select>
+                </div>
+                <div>
+                    <label for="methodSelect" class="block mb-2 font-medium text-gray-700">Pilih Metode Pengiriman</label>
+                    <select id="methodSelect" class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">-- Pilih Metode --</option>
+                        <option value="email">Email</option>
+                        <option value="whatsapp">WhatsApp</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="shareRecipientInput" class="space-y-4 hidden">
+                <label for="recipientInput" class="block mb-1 font-medium text-gray-700" id="recipientLabel"></label>
+                <input type="text" id="recipientInput" placeholder=""
+                       class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+                <p id="whatsappGroupHint" class="text-sm text-gray-500 hidden">Atau tempelkan Link Grup WhatsApp (cth: https://chat.whatsapp.com/...)</p>
+            </div>
+
+            <button id="sendSelectedBtn" class="w-full bg-blue-600 text-white px-5 py-2 rounded hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed mt-6">
+                Kirim
+            </button>
+            <button id="closeUniversalShareModalBtn" class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-3xl font-bold">
+                &times;
+            </button>
+        </div>
+    </div>
+
+
+    <script>
+        // --- User Credentials ---
+        const USERS = {
+            'admin': 'password123', // Admin username and password
+            'member1': 'demo1',    // Demo member username and password
+            // You can add more members here: 'another_member': 'their_password'
+        };
+        const ADMIN_USERNAME = 'admin'; // Explicitly define admin username
+        const DEMO_USERNAME = 'member1'; // Explicitly define demo member username
+
+        let currentUser = localStorage.getItem('currentUser') || null;
+        let isLoggedIn = currentUser !== null;
+        let isAdmin = isLoggedIn && currentUser === ADMIN_USERNAME;
+        let isDemo = isLoggedIn && currentUser === DEMO_USERNAME; // New: Check if current user is demo
+
+        // --- DOM Elements ---
+        const loginModal = document.getElementById('loginModal');
+        const loginForm = document.getElementById('loginForm');
+        const usernameInput = document.getElementById('usernameInput');
+        const passwordInput = document.getElementById('passwordInput');
+        const loginMessage = document.getElementById('loginMessage');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const welcomeMessage = document.getElementById('welcomeMessage');
+        const adminActionButtons = document.getElementById('adminActionButtons');
+        const goToManageBtn = document.getElementById('goToManageBtn');
+        const openShareModalBtn = document.getElementById('openShareModalBtn');
+
+
+        const homeSection = document.getElementById('home');
+        const manageSection = document.getElementById('manage');
+        const filesSection = document.getElementById('files');
+        const historySection = document.getElementById('history');
+
+        const navHome = document.getElementById('navHome');
+        const navManage = document.getElementById('navManage');
+        const navFiles = document.getElementById('navFiles');
+        const navHistory = document.getElementById('navHistory');
+
+        const uploadForm = document.getElementById('uploadForm');
+        const fileInput = document.getElementById('fileInput');
+        const fileNameInput = document.getElementById('fileName');
+        const uploadMessage = document.getElementById('uploadMessage');
+        const uploadButton = uploadForm.querySelector('button[type="submit"]');
+
+        const addLinkForm = document.getElementById('addLinkForm');
+        const linkUrlInput = document.getElementById('linkUrl');
+        const linkNameInput = document.getElementById('linkName');
+        const linkMessage = document.getElementById('linkMessage');
+        const addLinkButton = addLinkForm.querySelector('button[type="submit"]');
+
+        const filesList = document.getElementById('filesList');
+        const historyList = document.getElementById('historyList');
+
+        // Universal Share Modal Elements
+        const universalShareModal = document.getElementById('universalShareModal');
+        const closeUniversalShareModalBtn = document.getElementById('closeUniversalShareModalBtn');
+        const itemSelect = document.getElementById('itemSelect');
+        const methodSelect = document.getElementById('methodSelect');
+        const shareRecipientInputDiv = document.getElementById('shareRecipientInput');
+        const recipientLabel = document.getElementById('recipientLabel');
+        const recipientInput = document.getElementById('recipientInput');
+        const whatsappGroupHint = document.getElementById('whatsappGroupHint');
+        const sendSelectedBtn = document.getElementById('sendSelectedBtn');
+
+
+        // --- Data Storage (using localStorage) ---
+        let items = JSON.parse(localStorage.getItem('modsAimDeliveryItems')) || []; // Stores both files and links
+        let history = JSON.parse(localStorage.getItem('modsAimDeliveryHistory')) || [];
+
+        // --- Functions ---
+
+        // Manages UI visibility and interactive state based on login status and user role
+        function updateUI() {
+            if (isLoggedIn) {
+                loginModal.classList.add('hidden');
+                logoutBtn.classList.remove('hidden');
+                welcomeMessage.textContent = `Selamat datang, ${currentUser}!`;
+
+                // Show all main sections initially, then disable/enable elements
+                homeSection.style.display = 'block';
+                manageSection.style.display = 'block';
+                filesSection.style.display = 'block';
+                historySection.style.display = 'block';
+
+                // Show all nav links
+                navHome.classList.remove('hidden');
+                navManage.classList.remove('hidden');
+                navFiles.classList.remove('hidden');
+                navHistory.classList.remove('hidden');
+                adminActionButtons.classList.remove('hidden');
+
+                // --- Manage Section (Upload/Add Link Forms) ---
+                if (isAdmin) {
+                    uploadForm.classList.remove('demo-disabled-input'); // Renamed class
+                    fileInput.disabled = false;
+                    fileNameInput.disabled = false;
+                    uploadButton.disabled = false;
+                    uploadButton.onclick = null; // Remove demo alert handler
+                    fileInput.onclick = null; // Remove demo alert handler
+
+                    addLinkForm.classList.remove('demo-disabled-input'); // Renamed class
+                    linkUrlInput.disabled = false;
+                    linkNameInput.disabled = false;
+                    addLinkButton.disabled = false;
+                    addLinkButton.onclick = null; // Remove demo alert handler
+                    linkUrlInput.onclick = null; // Remove demo alert handler
+                    linkNameInput.onclick = null; // Remove demo alert handler
+
+                    goToManageBtn.textContent = 'Kelola File & Link (Admin)';
+                    openShareModalBtn.textContent = 'Kirim File/Link (Admin)';
+                    goToManageBtn.onclick = null; // Remove demo handler
+                    openShareModalBtn.onclick = null; // Remove demo handler
+
+                } else { // It's a demo user
+                    uploadForm.classList.add('demo-disabled-input'); // Renamed class
+                    fileInput.disabled = true;
+                    fileNameInput.disabled = true;
+                    uploadButton.disabled = true;
+                    uploadButton.onclick = (e) => { e.preventDefault(); alert('Fitur upload hanya tersedia untuk Admin.'); return false; };
+                    fileInput.onclick = (e) => { alert('Fitur upload hanya tersedia untuk Admin.'); };
+
+
+                    addLinkForm.classList.add('demo-disabled-input'); // Renamed class
+                    linkUrlInput.disabled = true;
+                    linkNameInput.disabled = true;
+                    addLinkButton.disabled = true;
+                    addLinkButton.onclick = (e) => { e.preventDefault(); alert('Fitur tambah link hanya tersedia untuk Admin.'); return false; };
+                    linkUrlInput.onclick = (e) => { alert('Fitur tambah link hanya tersedia untuk Admin.'); };
+                    linkNameInput.onclick = (e) => { alert('Fitur tambah link hanya tersedia untuk Admin.'); };
+
+
+                    goToManageBtn.textContent = 'Lihat Kelola File & Link (Demo)';
+                    goToManageBtn.onclick = () => { showSection('#manage'); };
+                    openShareModalBtn.textContent = 'Lihat Kirim File/Link (Demo)';
+                    openShareModalBtn.onclick = () => { openUniversalShareModal(); };
+
+                }
+
+                // --- Universal Share Modal ---
+                populateItemSelect(); // Always populate for both admin and demo
+
+                if (isDemo) {
+                    // Make select elements clickable but inputs not editable
+                    itemSelect.disabled = false; // Enable select
+                    methodSelect.disabled = false; // Enable select
+
+                    recipientInput.disabled = true; // Disable input for recipient
+                    recipientInput.classList.add('demo-disabled-input'); // Add class to show it's disabled
+
+                    sendSelectedBtn.disabled = true; // Disable send button
+                    sendSelectedBtn.classList.add('demo-disabled-button'); // Add class to show it's disabled
+                    sendSelectedBtn.onclick = (e) => { e.preventDefault(); alert('Fitur pengiriman hanya tersedia untuk Admin.'); return false; };
+
+                    // Add a click handler to selects to show alert (optional, but good for clarity)
+                    itemSelect.onclick = (e) => { /* No alert needed, they can interact */ };
+                    methodSelect.onclick = (e) => { /* No alert needed, they can interact */ };
+
+                    // Remove any generic modal-wide click handler
+                    universalShareModal.querySelector('.modal-content').onclick = null;
+
+                } else { // Admin mode: ensure everything is enabled
+                     universalShareModal.querySelectorAll('input, select, button').forEach(el => {
+                        el.disabled = false;
+                        el.classList.remove('demo-disabled-input'); // Clean up demo classes
+                        el.classList.remove('demo-disabled-button'); // Clean up demo classes
+                        el.onclick = null; // Remove demo alert handler
+                    });
+                    universalShareModal.querySelector('.modal-content').onclick = null;
+                }
+
+                if (window.location.hash !== '#manage' && window.location.hash !== '#history' && window.location.hash !== '#files') {
+                     window.location.hash = '#home';
+                }
+                showSection(window.location.hash || '#home');
+
+            } else { // Not logged in
+                loginModal.classList.remove('hidden');
+                logoutBtn.classList.add('hidden');
+                welcomeMessage.textContent = '';
+                homeSection.style.display = 'none';
+                manageSection.style.display = 'none';
+                filesSection.style.display = 'none';
+                historySection.style.display = 'none';
+                navHome.classList.add('hidden');
+                navManage.classList.add('hidden');
+                navFiles.classList.add('hidden');
+                navHistory.classList.add('hidden');
+                adminActionButtons.classList.add('hidden');
+            }
+            renderFiles();
+            renderHistory();
+        }
+
+        function showSection(hash) {
+            const sections = document.querySelectorAll('main section');
+            sections.forEach(section => {
+                section.style.display = 'none';
+            });
+
+            const targetSection = document.querySelector(hash);
+            if (targetSection) {
+                targetSection.style.display = 'block';
+            } else {
+                document.getElementById('home').style.display = 'block';
+            }
+        }
+
+
+        // Helper function to generate unique IDs
+        function generateId() {
+            return (
+                Date.now().toString(36) +
+                Math.random().toString(36).substring(2, 8)
+            );
+        }
+
+        // Save data to localStorage
+        function saveData() {
+            localStorage.setItem('modsAimDeliveryItems', JSON.stringify(items));
+            localStorage.setItem('modsAimDeliveryHistory', JSON.stringify(history));
+        }
+
+        // Render files and links list
+        function renderFiles() {
+            if (items.length === 0) {
+                filesList.innerHTML = '<p class="text-gray-500 col-span-full text-center">Belum ada file atau link yang diupload/ditambahkan.</p>';
+                return;
+            }
+            filesList.innerHTML = '';
+            items.forEach((item) => {
+                const itemEl = document.createElement('div');
+                itemEl.className = 'file-item flex flex-col md:flex-row md:items-center md:justify-between border border-gray-200 rounded-xl p-4 shadow-sm bg-white';
+
+                // Item info
+                const infoDiv = document.createElement('div');
+                infoDiv.className = 'flex items-center space-x-4 mb-3 md:mb-0 min-w-0';
+
+                // Item icon based on type
+                const iconDiv = document.createElement('div');
+                iconDiv.className = 'text-blue-600 text-4xl flex-shrink-0';
+                let iconClass = 'fas fa-file-alt'; // Default for files
+                let nameToDisplay = item.name;
+                let sizeOrUrlInfo = '';
+
+                if (item.type === 'link') {
+                    iconClass = 'fas fa-link text-purple-600'; // Icon for links
+                    sizeOrUrlInfo = item.url;
+                } else { // It's a file
+                    if (item.type.startsWith('image/')) iconClass = 'fas fa-file-image';
+                    else if (item.type.startsWith('video/')) iconClass = 'fas fa-file-video';
+                    else if (item.type.includes('audio/')) iconClass = 'fas fa-file-audio';
+                    else if (item.type === 'application/pdf') iconClass = 'fas fa-file-pdf';
+                    else if (item.type.includes('zip') || item.type.includes('compressed')) iconClass = 'fas fa-file-archive';
+                    else if (item.type.includes('text/')) iconClass = 'fas fa-file-code';
+                    sizeOrUrlInfo = formatBytes(item.size);
+                }
+                iconDiv.innerHTML = `<i class="${iconClass}"></i>`;
+
+                // Item name and info
+                const nameInfoDiv = document.createElement('div');
+                nameInfoDiv.className = 'flex flex-col overflow-hidden';
+                const nameEl = document.createElement('span');
+                nameEl.className = 'font-semibold text-gray-800 break-words text-lg';
+                nameEl.textContent = nameToDisplay;
+                const infoEl = document.createElement('span');
+                infoEl.className = 'text-sm text-gray-500 break-words';
+                infoEl.textContent = sizeOrUrlInfo;
+                nameInfoDiv.appendChild(nameEl);
+                nameInfoDiv.appendChild(infoEl);
+
+                infoDiv.appendChild(iconDiv);
+                infoDiv.appendChild(nameInfoDiv);
+
+                // Buttons: Download/Open Link, Share Email, Share WhatsApp, Delete
+                const btnDiv = document.createElement('div');
+                btnDiv.className = 'flex space-x-2 flex-wrap justify-end md:justify-start gap-2';
+
+                // Action button (Download for files, Open Link for links)
+                const actionBtn = document.createElement('button');
+                if (item.type === 'link') {
+                    actionBtn.className = 'bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg flex items-center space-x-1 text-sm font-medium';
+                    actionBtn.innerHTML = '<i class="fas fa-external-link-alt"></i><span>Buka Link</span>';
+                    actionBtn.addEventListener('click', () => {
+                        window.open(item.url, '_blank');
+                    });
+                } else { // It's a file
+                    actionBtn.className = 'bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center space-x-1 text-sm font-medium';
+                    actionBtn.innerHTML = '<i class="fas fa-download"></i><span>Download</span>';
+                    actionBtn.addEventListener('click', () => {
+                        downloadFile(item);
+                    });
+                }
+                btnDiv.appendChild(actionBtn);
+
+                // Delete button (Visible for both admin and demo, but disabled for demo)
+                const delBtn = document.createElement('button');
+                delBtn.className =
+                    'bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center space-x-1 text-sm font-medium';
+                delBtn.innerHTML = '<i class="fas fa-trash-alt"></i><span>Hapus</span>';
+
+                if (isDemo) {
+                    delBtn.disabled = true;
+                    delBtn.classList.add('demo-disabled-button'); // Renamed class
+                    delBtn.onclick = (e) => {
+                        e.preventDefault();
+                        alert('Fitur hapus hanya tersedia untuk Admin.');
+                        return false;
+                    };
+                } else {
+                    delBtn.addEventListener('click', () => {
+                        if (confirm(`Hapus ${item.type === 'link' ? 'link' : 'file'} "${item.name}"?`)) {
+                            deleteItem(item.id);
+                        }
+                    });
+                }
+                btnDiv.appendChild(delBtn);
+
+
+                itemEl.appendChild(infoDiv);
+                itemEl.appendChild(btnDiv);
+
+                filesList.appendChild(itemEl);
+            });
+        }
+
+        // Render history list (Visible for both admin and demo, but read-only for demo)
+        function renderHistory() {
+            if (history.length === 0) {
+                historyList.innerHTML = '<p class="text-gray-500 text-center">Belum ada riwayat pengiriman.</p>';
+                return;
+            }
+            historyList.innerHTML = '';
+            history.forEach((item) => {
+                const itemEl = document.createElement('div');
+                itemEl.className = 'border border-gray-200 rounded-xl p-4 bg-white shadow-sm flex flex-col md:flex-row md:justify-between md:items-center file-item';
+
+                const infoDiv = document.createElement('div');
+                infoDiv.className = 'mb-2 md:mb-0 min-w-0';
+
+                const toEl = document.createElement('p');
+                toEl.className = 'font-semibold text-gray-800 break-words text-base';
+                toEl.textContent = `Dikirim ke: ${item.to}`;
+
+                const methodEl = document.createElement('p');
+                methodEl.className = 'text-sm text-gray-600';
+                methodEl.textContent = `Metode: ${item.method === 'email' ? 'Email' : 'WhatsApp'}`;
+
+                const fileEl = document.createElement('p');
+                fileEl.className = 'text-sm text-gray-600 break-words';
+                fileEl.textContent = `${item.type === 'link' ? 'Link' : 'File'}: ${item.fileName}`;
+
+                const dateEl = document.createElement('p');
+                dateEl.className = 'text-xs text-gray-500 mt-1';
+                const d = new Date(item.date);
+                dateEl.textContent = `Tanggal: ${d.toLocaleString('id-ID')}`;
+
+                infoDiv.appendChild(toEl);
+                infoDiv.appendChild(methodEl);
+                infoDiv.appendChild(fileEl);
+                infoDiv.appendChild(dateEl);
+
+                itemEl.appendChild(infoDiv);
+
+                historyList.appendChild(itemEl);
+            });
+        }
+
+        // Format bytes to human readable
+        function formatBytes(bytes, decimals = 2) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const dm = decimals < 0 ? 0 : decimals;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+        }
+
+        // Download file from base64 data
+        function downloadFile(file) {
+            const link = document.createElement('a');
+            link.href = file.data;
+            link.download = file.name;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Delete item by id (can be file or link)
+        function deleteItem(id) {
+            items = items.filter((f) => f.id !== id);
+            saveData();
+            renderFiles();
+        }
+
+        // Convert base64 dataURL to Blob (for sharing via email/whatsapp, though for email we send link)
+        function dataURLtoBlob(dataurl) {
+            const arr = dataurl.split(',');
+            const mime = arr[0].match(/:(.*?);/)[1];
+            const bstr = atob(arr[1]);
+            let n = bstr.length;
+            const u8arr = new Uint8Array(n);
+            while (n--) {
+                u8arr[n] = bstr.charCodeAt(n);
+            }
+            return new Blob([u8arr], { type: mime });
+        }
+
+
+        // --- Event Listeners ---
+
+        // Login Form Submission
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = usernameInput.value;
+            const password = passwordInput.value;
+
+            if (USERS[username] && USERS[username] === password) {
+                currentUser = username;
+                isLoggedIn = true;
+                isAdmin = currentUser === ADMIN_USERNAME;
+                isDemo = currentUser === DEMO_USERNAME; // Set isDemo on login
+                localStorage.setItem('currentUser', currentUser);
+                loginMessage.textContent = '';
+                updateUI();
+            } else {
+                loginMessage.textContent = 'Username atau Password salah!';
+            }
+        });
+
+        // Logout Button
+        logoutBtn.addEventListener('click', () => {
+            currentUser = null;
+            isLoggedIn = false;
+            isAdmin = false;
+            isDemo = false; // Reset isDemo on logout
+            localStorage.removeItem('currentUser');
+            updateUI();
+            // Clear inputs for security
+            usernameInput.value = '';
+            passwordInput.value = '';
+        });
+
+        // Handle navigation clicks to show/hide sections
+        document.querySelectorAll('header nav a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const hash = e.target.getAttribute('href');
+                window.location.hash = hash;
+                showSection(hash);
+            });
+        });
+
+        // Handle hash changes (back/forward button)
+        window.addEventListener('hashchange', () => {
+            showSection(window.location.hash);
+        });
+
+        // Admin action buttons on home screen (now also used by demo)
+        goToManageBtn.addEventListener('click', (e) => {
+            if (isDemo) {
+                e.preventDefault();
+            }
+            window.location.hash = '#manage';
+            showSection('#manage');
+        });
+
+        openShareModalBtn.addEventListener('click', (e) => {
+            if (isDemo) {
+                e.preventDefault();
+            }
+            populateItemSelect();
+            universalShareModal.classList.remove('hidden');
+            sendSelectedBtn.disabled = true; // Disable initially for both admin and demo
+            shareRecipientInputDiv.classList.add('hidden');
+            recipientInput.value = '';
+            itemSelect.value = '';
+            methodSelect.value = '';
+
+            // Apply demo specific state after modal opens and elements are populated
+            if (isDemo) {
+                recipientInput.disabled = true; // Make input non-editable for demo
+                recipientInput.classList.add('demo-disabled-input'); // Add visual cue
+
+                sendSelectedBtn.disabled = true; // Keep send button disabled for demo
+                sendSelectedBtn.classList.add('demo-disabled-button'); // Add visual cue
+                sendSelectedBtn.onclick = (ev) => { ev.preventDefault(); alert('Fitur pengiriman hanya tersedia untuk Admin.'); return false; };
+            }
+        });
+
+        // Upload Form Submission (only active for admin)
+        uploadForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (!isAdmin) {
+                alert("Fitur upload hanya tersedia untuk Admin.");
+                return;
+            }
+            const file = fileInput.files[0];
+            if (!file) {
+                uploadMessage.textContent = 'Pilih file terlebih dahulu.';
+                uploadMessage.classList.remove('text-green-600');
+                uploadMessage.classList.add('text-red-600');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                const base64Data = event.target.result;
+                const newItem = {
+                    id: generateId(),
+                    name: fileNameInput.value.trim() || file.name,
+                    size: file.size,
+                    type: file.type,
+                    data: base64Data,
+                    date: new Date().toISOString(),
+                };
+                items.unshift(newItem);
+                saveData();
+                renderFiles();
+                uploadMessage.textContent = `File "${newItem.name}" berhasil diupload dan disimpan secara lokal.`;
+                uploadMessage.classList.remove('text-red-600');
+                uploadMessage.classList.add('text-green-600');
+                uploadForm.reset();
+                setTimeout(() => { // Clear message after 3 seconds
+                    uploadMessage.textContent = '';
+                }, 3000);
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // Add Link Form Submission (only active for admin)
+        addLinkForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (!isAdmin) {
+                alert("Fitur tambah link hanya tersedia untuk Admin.");
+                return;
+            }
+            const url = linkUrlInput.value.trim();
+            const name = linkNameInput.value.trim();
+
+            if (!url || !name) {
+                linkMessage.textContent = 'URL Link dan Nama Link harus diisi.';
+                linkMessage.classList.remove('text-green-600');
+                linkMessage.classList.add('text-red-600');
+                return;
+            }
+
+            const newItem = {
+                id: generateId(),
+                name: name,
+                type: 'link',
+                url: url,
+                date: new Date().toISOString(),
+            };
+            items.unshift(newItem);
+            saveData();
+            renderFiles();
+            linkMessage.textContent = `Link "${newItem.name}" berhasil ditambahkan.`;
+            linkMessage.classList.remove('text-red-600');
+            linkMessage.classList.add('text-green-600');
+            addLinkForm.reset();
+            setTimeout(() => { // Clear message after 3 seconds
+                linkMessage.textContent = '';
+            }, 3000);
+        });
+
+
+        // --- Universal Share Modal Logic ---
+
+        function populateItemSelect() {
+            itemSelect.innerHTML = '<option value="">-- Pilih Item --</option>';
+            items.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item.id;
+                option.textContent = `${item.name} (${item.type === 'link' ? 'Link' : 'File'})`;
+                itemSelect.appendChild(option);
+            });
+        }
+
+        itemSelect.addEventListener('change', () => {
+            // Only check status if not in demo mode
+            if (!isDemo) {
+                checkSendButtonStatus();
+            }
+        });
+
+        methodSelect.addEventListener('change', () => {
+            const selectedMethod = methodSelect.value;
+            if (selectedMethod === 'email') {
+                shareRecipientInputDiv.classList.remove('hidden');
+                recipientLabel.textContent = 'Masukkan Alamat Email';
+                recipientInput.type = 'email';
+                recipientInput.placeholder = 'Contoh: user@example.com';
+                whatsappGroupHint.classList.add('hidden');
+            } else if (selectedMethod === 'whatsapp') {
+                shareRecipientInputDiv.classList.remove('hidden');
+                recipientLabel.textContent = 'Masukkan Nomor WhatsApp (dengan kode negara)';
+                recipientInput.type = 'tel';
+                recipientInput.placeholder = 'Contoh: 6281234567890';
+                whatsappGroupHint.classList.remove('hidden');
+            } else {
+                shareRecipientInputDiv.classList.add('hidden');
+            }
+            recipientInput.value = '';
+            // Only check status if not in demo mode
+            if (!isDemo) {
+                checkSendButtonStatus();
+            }
+        });
+
+        recipientInput.addEventListener('input', () => {
+            // Only check status if not in demo mode
+            if (!isDemo) {
+                checkSendButtonStatus();
+            }
+        });
+
+        function checkSendButtonStatus() {
+            // This function should only control the button for ADMIN
+            if (!isAdmin) return;
+
+            const selectedItemId = itemSelect.value;
+            const selectedMethod = methodSelect.value;
+            const recipientFilled = recipientInput.value.trim() !== '';
+
+            sendSelectedBtn.disabled = !(selectedItemId && selectedMethod && recipientFilled);
+        }
+
+        closeUniversalShareModalBtn.addEventListener('click', () => {
+            universalShareModal.classList.add('hidden');
+        });
+
+        universalShareModal.addEventListener('click', (e) => {
+            // Allow closing by clicking outside for both admin and demo
+            if (e.target === universalShareModal) { 
+                universalShareModal.classList.add('hidden');
+            }
+        });
+
+        sendSelectedBtn.addEventListener('click', () => {
+            if (isDemo) { // Double-check for demo users
+                alert('Fitur pengiriman hanya tersedia untuk Admin.');
+                return;
+            }
+
+            const selectedItemId = itemSelect.value;
+            const selectedMethod = methodSelect.value;
+            const recipient = recipientInput.value.trim();
+
+            if (!selectedItemId || !selectedMethod || !recipient) {
+                alert('Harap lengkapi semua kolom: pilih item, metode, dan masukkan penerima.');
+                return;
+            }
+
+            const itemToSend = items.find(item => item.id === selectedItemId);
+
+            if (!itemToSend) {
+                alert('Item tidak ditemukan. Mohon coba lagi.');
+                return;
+            }
+
+            if (selectedMethod === 'email') {
+                sendEmail(recipient, itemToSend);
+            } else if (selectedMethod === 'whatsapp') {
+                sendWhatsApp(recipient, itemToSend);
+            }
+            universalShareModal.classList.add('hidden');
+        });
+
+        // Send Email function (adapted for file data or direct link)
+        function sendEmail(email, item) {
+            let shareContent;
+            let subjectPrefix = item.type === 'link' ? 'Link' : 'File';
+
+            if (item.type === 'link') {
+                shareContent = `Halo,\n\nSaya membagikan link "${item.name}" dengan Anda.\n\nAnda dapat membukanya melalui tautan berikut:\n${item.url}\n\nSalam.`;
+            } else { // It's a file (local data URL)
+                const blob = dataURLtoBlob(item.data);
+                const url = URL.createObjectURL(blob);
+                shareContent = `Halo,\n\nSaya membagikan file "${item.name}" dengan Anda.\n\nAnda dapat mengunduhnya melalui tautan berikut (tautan ini hanya berlaku di browser pengirim dan sesi ini):\n${url}\n\nSalam.`;
+            }
+
+            const subject = encodeURIComponent(`${subjectPrefix} dari MODS AIM DELIVERY: ${item.name}`);
+            const body = encodeURIComponent(shareContent);
+            window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+            addToHistory(email, 'email', item.name, item.type);
+            alert(`Email siap dikirim ke ${email}.`);
+        }
+
+        // Send WhatsApp function (unified for number and group link)
+        function sendWhatsApp(recipient, item) {
+            let shareContent;
+            if (item.type === 'link') {
+                shareContent = `Pengiriman Berhasil Dari Web Mods Aim Team\n\nHalo, saya membagikan link "${item.name}" dengan Anda.\nSilakan buka tautan berikut:\n${item.url}`;
+            } else { // It's a file (local data URL)
+                const blob = dataURLtoBlob(item.data);
+                const url = URL.createObjectURL(blob);
+                shareContent = `Pengiriman Berhasil Dari Web Mods Aim Team\n\nHalo, saya membagikan file "${item.name}" dengan Anda.\nSilakan unduh file melalui tautan berikut (tautan ini hanya berlaku di browser pengirim dan sesi ini):\n${url}`;
+            }
+
+            const message = encodeURIComponent(shareContent);
+
+            if (recipient.startsWith('https://chat.whatsapp.com/')) {
+                // It's a WhatsApp group link
+                window.open(`${recipient}?text=${message}`, '_blank');
+                addToHistory(recipient, 'whatsapp group', item.name, item.type);
+                alert(`Pesan WhatsApp siap dikirim ke grup: ${recipient}.`);
+            } else {
+                // Assume it's a number
+                const cleanNumber = recipient.replace(/\D/g, '');
+                if (!cleanNumber) {
+                    alert('Nomor WhatsApp tidak valid.');
+                    return;
+                }
+                window.open(`https://wa.me/${cleanNumber}?text=${message}`, '_blank');
+                addToHistory(cleanNumber, 'whatsapp', item.name, item.type);
+                alert(`Pesan WhatsApp siap dikirim ke ${cleanNumber}.`);
+            }
+        }
+
+
+        // Add to history and save
+        function addToHistory(to, method, itemName, type) {
+            history.unshift({
+                id: generateId(),
+                to,
+                method,
+                fileName: itemName,
+                type,
+                date: new Date().toISOString(),
+            });
+            saveData();
+            renderHistory();
+        }
+
+        // Initial setup on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            updateUI();
+        });
+
+    </script>
+</body>
+</html>
